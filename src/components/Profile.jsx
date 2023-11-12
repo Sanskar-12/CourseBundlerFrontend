@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Avatar,
   Button,
@@ -22,27 +22,21 @@ import {
 import { Link } from 'react-router-dom';
 import { RiDeleteBin7Fill } from 'react-icons/ri';
 import { fileUploadCss } from './Register';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  getMyprofileAction,
+  updateProfilePictureAction,
+} from '../redux/actions/userAction';
+import toast from 'react-hot-toast';
 
-const user = {
-  name: 'Sanskar',
-  email: 'sanskar@gmail.com',
-  createdAt: String(new Date().toISOString()),
-  role: 'user',
-  subscription: {
-    status: 'active',
-  },
-  playlist: [
-    {
-      course: 'kndnkf',
-      poster: 'jdfnk',
-    },
-  ],
-};
-
-const Profile = () => {
+const Profile = ({ user }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [imageprev, setImagePrev] = useState('');
   const [image, setImage] = useState('');
+
+  const dispatch = useDispatch();
+  const { loading, message, error } = useSelector(state => state.profile);
+
   const removefromPlaylistHandler = id => {
     console.log(id);
   };
@@ -60,15 +54,33 @@ const Profile = () => {
     };
   };
 
-  const imageSubmitHandler = (e, image) => {
-    e.preventDefault()
+  const imageSubmitHandler = async (e, image) => {
+    e.preventDefault();
+
+    const formdata = new FormData();
+
+    formdata.append('file', image);
+
+    await dispatch(updateProfilePictureAction(formdata));
+    dispatch(getMyprofileAction());
   };
 
-  const onCloseHandler=()=>{
-    onClose()
-    setImagePrev("")
-    setImage("")
-  }
+  const onCloseHandler = () => {
+    onClose();
+    setImagePrev('');
+    setImage('');
+  };
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+      dispatch({ type: 'clearError' });
+    }
+    if (message) {
+      toast.success(message);
+      dispatch({ type: 'clearMessage' });
+    }
+  }, [dispatch, error, message]);
 
   return (
     <Container minH={'95vh'} maxW={'container.lg'} py={'8'}>
@@ -83,7 +95,7 @@ const Profile = () => {
         padding={'8'}
       >
         <VStack>
-          <Avatar boxSize={'48'} />
+          <Avatar boxSize={'48'} src={user?.avatar?.url} />
           <Button colorScheme="yellow" variant={'ghost'} onClick={onOpen}>
             Change Photo
           </Button>
@@ -91,20 +103,20 @@ const Profile = () => {
         <VStack spacing={'4'} alignItems={['center', 'flex-start']}>
           <HStack>
             <Text fontWeight={'bold'}>Name</Text>
-            <Text>{user.name}</Text>
+            <Text>{user?.name}</Text>
           </HStack>
           <HStack>
             <Text fontWeight={'bold'}>Email</Text>
-            <Text>{user.email}</Text>
+            <Text>{user?.email}</Text>
           </HStack>
           <HStack>
             <Text fontWeight={'bold'}>Created At</Text>
-            <Text>{user.createdAt.split('T')[0]}</Text>
+            <Text>{user?.createdAt?.split('T')[0]}</Text>
           </HStack>
-          {user.role !== 'admin' && (
+          {user?.role !== 'admin' && (
             <HStack>
               <Text fontWeight={'bold'}>Subscription</Text>
-              {user.subscription.status === 'active' ? (
+              {user?.subscription?.status === 'active' ? (
                 <Button color={'yellow.500'} variant={'unstyled'}>
                   Cancel Subscription
                 </Button>
@@ -129,14 +141,14 @@ const Profile = () => {
       <Heading size={'md'} my={'8'}>
         Playlist
       </Heading>
-      {user.playlist.length > 0 && (
+      {user?.playlist?.length > 0 && (
         <Stack
           direction={['column', 'row']}
           alignItems={'center'}
           flexWrap={'wrap'}
           p={'4'}
         >
-          {user.playlist.map(item => (
+          {user?.playlist?.map(item => (
             <VStack w={'48'} m={'2'} key={item.course}>
               <Image src={item.poster} boxSize={'full'} objectFit={'contain'} />
               <HStack>
@@ -159,7 +171,7 @@ const Profile = () => {
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay backdropFilter={'blur(10px)'} />
         <ModalContent>
-            <ModalHeader>Change Photo </ModalHeader>
+          <ModalHeader>Change Photo </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <Container>
@@ -171,7 +183,12 @@ const Profile = () => {
                     css={{ '&::file-selector-button': fileUploadCss }}
                     onChange={changeImageHandler}
                   />
-                  <Button w={'full'} colorScheme="yellow" type="submit">
+                  <Button
+                    w={'full'}
+                    colorScheme="yellow"
+                    type="submit"
+                    isLoading={loading}
+                  >
                     Change
                   </Button>
                 </VStack>

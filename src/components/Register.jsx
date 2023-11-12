@@ -10,6 +10,8 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
+import {useDispatch} from "react-redux"
+import {registerAction} from "../redux/actions/userAction.js"
 
 export const fileUploadCss = {
   cursor: 'pointer',
@@ -32,6 +34,8 @@ const Register = () => {
   const [imageprev, setImagePrev] = useState('');
   const [image, setImage] = useState('');
 
+  const dispatch=useDispatch()
+
   const changeImageHandler = e => {
     const file = e.target.files[0];
 
@@ -45,11 +49,24 @@ const Register = () => {
     };
   };
 
+  const submitHandler=(e)=>{
+    e.preventDefault()
+    const formdata=new FormData()
+
+    formdata.append('name',name)
+    formdata.append('email',email)
+    formdata.append('password',password)
+    formdata.append('file',image)
+
+    dispatch(registerAction(formdata))
+    
+  }
+
   return (
     <Container h={'100vh'}>
       <VStack h={'full'} justifyContent={'center'} spacing={'6'}>
         <Heading textTransform={'uppercase'}>Registration</Heading>
-        <form style={{ width: '100%' }}>
+        <form style={{ width: '100%' }} onSubmit={submitHandler}>
           <Box my={'4'} display={'flex'} justifyContent={'center'}>
             <Avatar src={imageprev} size={'2xl'} />
           </Box>
