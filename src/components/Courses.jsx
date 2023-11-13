@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './Courses.css';
 import {
   Button,
@@ -10,6 +10,9 @@ import {
   Text,
 } from '@chakra-ui/react';
 import CourseCard from './CourseCard';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAllCoursesAction } from '../redux/actions/courseAction';
+import toast from 'react-hot-toast';
 
 const Courses = () => {
   const categories = [
@@ -21,12 +24,24 @@ const Courses = () => {
     'Game Development',
   ];
 
-  const { keyword, setKeyword } = useState('');
-  const { category, setCategory } = useState('');
+  const [keyword, setKeyword] = useState('');
+  const [category, setCategory] = useState('');
 
-  const addtoPlaylistHandler=()=>{
-    console.log("added")
-  }
+  const dispatch = useDispatch();
+  const { error, course } = useSelector(state => state.course);
+
+  useEffect(() => {
+    dispatch(getAllCoursesAction(category, keyword));
+
+    if (error) {
+      toast.error(error);
+      dispatch({ type: 'clearError' });
+    }
+  }, [dispatch, category, keyword, error]);
+
+  const addtoPlaylistHandler = courseId => {
+    console.log('added');
+  };
 
   return (
     <Container minH={'95vh'} maxW={'container.lg'} paddingY={'8'}>
@@ -61,16 +76,23 @@ const Courses = () => {
         justifyContent={['flex-start', 'space-evenly']}
         alignItems={['center', 'flex-start']}
       >
-        <CourseCard
-        title={'Sample'}
-        description={'Sample'}
-        views={30}
-        imageSrc={'sample'}
-        id={'sample'}
-        creator={'sample'}
-        lectCount={5}
-        addtoPlaylistHandler={addtoPlaylistHandler}
-        />
+        {course?.length > 0 ? (
+          course?.map(item => (
+            <CourseCard
+              key={item?._id}
+              title={item?.title}
+              description={item?.description}
+              views={item?.views}
+              imageSrc={item?.poster?.url}
+              id={item?._id}
+              creator={item?.createdBy}
+              lectCount={item?.numOfVideos}
+              addtoPlaylistHandler={addtoPlaylistHandler}
+            />
+          ))
+        ) : (
+          <Heading opacity={0.5} mt={'4'}>Course Not Found</Heading>
+        )}
       </Stack>
     </Container>
   );

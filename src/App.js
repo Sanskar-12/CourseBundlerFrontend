@@ -63,8 +63,6 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/courses" element={<Courses />} />
-            <Route path="/forgetpassword" element={<ForgetPassword />} />
-            <Route path="/resetpassword/:token" element={<ResetPassword />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/request" element={<Request />} />
             <Route path="/about" element={<About />} />
@@ -107,7 +105,7 @@ function App() {
               path="/profile"
               element={
                 <ProtectedRoute isAuthenticated={isAuthenticated}>
-                  <Profile user={user}/>
+                  <Profile user={user} />
                 </ProtectedRoute>
               }
             />
@@ -115,7 +113,7 @@ function App() {
               path="/updateprofile"
               element={
                 <ProtectedRoute isAuthenticated={isAuthenticated}>
-                  <UpdateProfile user={user}/>
+                  <UpdateProfile user={user} />
                 </ProtectedRoute>
               }
             />
@@ -124,6 +122,28 @@ function App() {
               element={
                 <ProtectedRoute isAuthenticated={isAuthenticated}>
                   <ChangePassword />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/forgetpassword"
+              element={
+                <ProtectedRoute
+                  isAuthenticated={!isAuthenticated}
+                  redirect={'/profile'}
+                >
+                  <ForgetPassword />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/resetpassword/:token"
+              element={
+                <ProtectedRoute
+                  isAuthenticated={!isAuthenticated}
+                  redirect={'/profile'}
+                >
+                  <ResetPassword />
                 </ProtectedRoute>
               }
             />
