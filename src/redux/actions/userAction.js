@@ -193,7 +193,7 @@ export const forgetPasswordAction = email => async dispatch => {
       type: 'forgetPasswordRequest',
     });
 
-    const { data } = await axios.post(`${server}/forgetpassword`, email, {
+    const { data } = await axios.post(`${server}/forgetpassword`, {email}, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -220,7 +220,7 @@ export const resetPasswordAction = (token, password) => async dispatch => {
 
     const { data } = await axios.put(
       `${server}/resetpassword/${token}`,
-      password,
+      {password},
       {
         headers: {
           'Content-Type': 'application/json',
@@ -236,6 +236,69 @@ export const resetPasswordAction = (token, password) => async dispatch => {
   } catch (error) {
     dispatch({
       type: 'resetPasswordFail',
+      payload: error.response.data.message,
+    });
+  }
+};
+
+
+
+export const addToPlaylistAction = (id) => async dispatch => {
+  try {
+    dispatch({
+      type: 'addToPlaylistRequest',
+    });
+
+    const { data } = await axios.post(
+      `${server}/addToPlaylist`,
+      {id},
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        withCredentials: true,
+      }
+    );
+
+    dispatch({
+      type: 'addToPlaylistSuccess',
+      payload: data.message,
+    });
+  } catch (error) {
+    dispatch({
+      type: 'addToPlaylistFail',
+      payload: error.response.data.message,
+    });
+  }
+};
+
+
+
+
+export const removeFromPlaylistAction = (id) => async dispatch => {
+  try {
+    dispatch({
+      type: 'removeFromPlaylistRequest',
+    });
+
+    const { data } = await axios.post(
+      `${server}/removefromPlaylist`,
+      {id},
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        withCredentials: true,
+      }
+    );
+
+    dispatch({
+      type: 'removeFromPlaylistSuccess',
+      payload: data.message,
+    });
+  } catch (error) {
+    dispatch({
+      type: 'removeFromPlaylistFail',
       payload: error.response.data.message,
     });
   }

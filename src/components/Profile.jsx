@@ -25,6 +25,7 @@ import { fileUploadCss } from './Register';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   getMyprofileAction,
+  removeFromPlaylistAction,
   updateProfilePictureAction,
 } from '../redux/actions/userAction';
 import toast from 'react-hot-toast';
@@ -36,9 +37,11 @@ const Profile = ({ user }) => {
 
   const dispatch = useDispatch();
   const { loading, message, error } = useSelector(state => state.profile);
+  const {  message:courseMessage, error:courseError } = useSelector(state => state.course);
 
-  const removefromPlaylistHandler = id => {
-    console.log(id);
+  const removefromPlaylistHandler = async (id) => {
+    await dispatch(removeFromPlaylistAction(id))
+    dispatch(getMyprofileAction())
   };
 
   const changeImageHandler = e => {
@@ -80,7 +83,18 @@ const Profile = ({ user }) => {
       toast.success(message);
       dispatch({ type: 'clearMessage' });
     }
-  }, [dispatch, error, message]);
+
+    if (courseError) {
+      toast.error(courseError);
+      dispatch({ type: 'clearError' });
+    }
+    if (courseMessage) {
+      toast.success(courseMessage);
+      dispatch({ type: 'clearMessage' });
+    }
+
+
+  }, [dispatch, error, message,courseError,courseMessage]);
 
   return (
     <Container minH={'95vh'} maxW={'container.lg'} py={'8'}>
@@ -157,7 +171,7 @@ const Profile = ({ user }) => {
                     Watch Now
                   </Button>
                 </Link>
-                <Button>
+                <Button isLoading={loading}>
                   <RiDeleteBin7Fill
                     onClick={() => removefromPlaylistHandler(item.course)}
                   />

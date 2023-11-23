@@ -13,6 +13,7 @@ import CourseCard from './CourseCard';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllCoursesAction } from '../redux/actions/courseAction';
 import toast from 'react-hot-toast';
+import { addToPlaylistAction, getMyprofileAction } from '../redux/actions/userAction';
 
 const Courses = () => {
   const categories = [
@@ -28,7 +29,7 @@ const Courses = () => {
   const [category, setCategory] = useState('');
 
   const dispatch = useDispatch();
-  const { error, course } = useSelector(state => state.course);
+  const { error, course,message,loading } = useSelector(state => state.course);
 
   useEffect(() => {
     dispatch(getAllCoursesAction(category, keyword));
@@ -37,10 +38,17 @@ const Courses = () => {
       toast.error(error);
       dispatch({ type: 'clearError' });
     }
-  }, [dispatch, category, keyword, error]);
 
-  const addtoPlaylistHandler = courseId => {
-    console.log('added');
+    if(message) {
+      toast.success(message);
+      dispatch({ type: 'clearMessage' });
+    }
+  }, [dispatch, category, keyword, error,message]);
+
+  const addtoPlaylistHandler = async (courseId) => {
+
+    await dispatch(addToPlaylistAction(courseId))
+    dispatch(getMyprofileAction())
   };
 
   return (
@@ -88,6 +96,7 @@ const Courses = () => {
               creator={item?.createdBy}
               lectCount={item?.numOfVideos}
               addtoPlaylistHandler={addtoPlaylistHandler}
+              loading={loading}
             />
           ))
         ) : (

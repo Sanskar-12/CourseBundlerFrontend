@@ -133,7 +133,7 @@ export const profileReducer=createReducer(intialState,{
         state.error=action.payload
     },
 
-
+   
     
     clearError:(state)=>{
         state.error=null
